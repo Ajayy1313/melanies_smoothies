@@ -1,7 +1,8 @@
 
 # Import python packages
 import streamlit as st
-from snowflake.snowpark.functions import col,when_matched
+import requests
+from snowflake.snowpark.functions import col
 
 # Title
 st.title(":cup_with_straw: Customize Your Smoothie! :cup_with_straw:")
