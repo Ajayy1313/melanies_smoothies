@@ -16,16 +16,16 @@ st.write('The name on your Smoothie will be:', name_on_order)
 cnx = st.connection("snowflake")
 session = cnx.session()
 
-# Fetch data including the SEARCH_ON column
+# 1. Select both FRUIT_NAME and SEARCH_ON
 my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'), col('SEARCH_ON'))
 
-# Convert Snowpark Dataframe to Pandas for the .loc function
+# 2. Convert to Pandas so we can use the LOC function
 pd_df = my_dataframe.to_pandas()
 
 # Multiselect dropdown
 ingredients_list = st.multiselect(
     'Choose up to 5 ingredients:',
-    my_dataframe,
+    my_dataframe, # Use the Snowpark dataframe for the options
     max_selections=5
 )
 
@@ -35,13 +35,15 @@ if ingredients_list:
     for fruit_chosen in ingredients_list:
         ingredients_string += fruit_chosen + ' '
         
-        # Logic to find the search term for the API (Refer to image_a11d1b.png)
+        # 3. Logic to extract the specific SEARCH_ON value
         search_on = pd_df.loc[pd_df['FRUIT_NAME'] == fruit_chosen, 'SEARCH_ON'].iloc[0]
+        
+        # This creates the sentence seen in image_a11d1b.png
         st.write('The search value for ', fruit_chosen, ' is ', search_on, '.')
 
         st.subheader(fruit_chosen + ' Nutrition Information')
         
-        # Fetch nutrition data using the mapped search_on value
+        # 4. Use the search_on variable in the Fruityvice API call
         fruityvice_response = requests.get("https://fruityvice.com/api/fruit/" + search_on)
         
         if fruityvice_response.status_code == 200:
